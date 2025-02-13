@@ -3,7 +3,8 @@ var router = express.Router();
 var express = require('express');
 var router = express.Router();
 const uid2 = require('uid2');
-
+const { getTimeElapsed } = require('../modules/momentfromnow');
+const moment = require('moment');
 require('../models/connection');
 const User = require('../models/user');
 const Tweet = require('../models/tweet');
@@ -14,10 +15,10 @@ const Tweet = require('../models/tweet');
 
 router.post('/newTweet/:tokenUser', async (req, res) => {
     try {
-        // Rechercher l'utilisateur via son token
+        // Look for user by his token
         const tokenData = await User.findOne({ tokenUser: req.params.tokenUser })
         console.log(tokenData)
-        // sauvegarde du tweet
+        // save the new tweet
         if (tokenData) {
             const date = Date()
             const newTweet = new Tweet({
@@ -26,11 +27,17 @@ router.post('/newTweet/:tokenUser', async (req, res) => {
                 date: date,
                 tokenTweet: uid2(32),
                 trash: false,
-            }); // depploiement de user
+            }); 
+            //------------show the new tweet------------
             const saveTweet = await newTweet.save();
             const populatedTweet = await Tweet.findById(saveTweet.id)
                 .populate('user');
-            console.log(populatedTweet)
+
+                
+                // console.log(datetofront)
+            // console.log(populatedTweet)
+
+            //tweet formated
             const obj = {
                 firstname: populatedTweet.user.firstname,
                 username: '@' + populatedTweet.user.username,
@@ -59,28 +66,36 @@ router.post('/newTweet/:tokenUser', async (req, res) => {
 //--------------------------------------------------------------------------
 // Get allTweet Road
 //--------------------------------------------------------------------------
+
 router.get('/', async (req, res) => {
     try {
-        const tweetData = await Tweet.find({ trash: false }).populate('user')
-        const obj = tweetData.map(tweet => ({
-            firstname: tweet.user.firstname,
-            username: '@' + tweet.user.username,
-            avatar: tweet.user.avatar,
-            tokenUser: tweet.user.tokenUser,
-            tweet: tweet.tweet,
-            date: tweet.date,
-            trash: tweet.trash,
-            tokenTweet: tweet.tokenTweet,
-            like: tweet.like,
-        }))
-        //  console.log(tweetData)
+        //find all untrash tweet 
+        const tweetData = await Tweet.find({ trash: false }).populate('user');
+console.log(tweetData.date);
+
+const obj = tweetData.map(tweet => {
+    const formattedDate = getTimeElapsed(tweet.date); // change the date to time spend
+    // return tweets formated
+    return {  
+        firstname: tweet.user.firstname,
+        username: '@' + tweet.user.username,
+        avatar: tweet.user.avatar,
+        tokenUser: tweet.user.tokenUser,
+        tweet: tweet.tweet,
+        date: formattedDate, 
+        trash: tweet.trash,
+        tokenTweet: tweet.tokenTweet,
+        like: tweet.like,
+    };
+});
+    
+        console.log(tweetData)
         res.json({ result: true, tweets: obj })
     } catch (error) {
         // errors 
         res.status(500).json({ result: false, message: 'Une erreur est survenue.', error });
     }
 })
-
 //--------------------------------------------------------------------------
 // Ubdapte liketweet/unLikeTweet Road
 //--------------------------------------------------------------------------
@@ -115,7 +130,7 @@ router.put('/likeTweet/:tokenTweet/:tokenUser', async (req, res) => {
         await tweetLike.save();
 
         console.log('Liste des likers mise à jour:', tweetLike.liker);
-
+        
         return res.json({ result: true, message: 'Action effectuée avec succès.' });
     } catch (error) {
         console.error(error);
@@ -123,5 +138,49 @@ router.put('/likeTweet/:tokenTweet/:tokenUser', async (req, res) => {
     }
 });
 
+
+//--------------------------------------------------------------------------
+// Ubdapte trashtweet/untrashTweet Road
+//--------------------------------------------------------------------------
+
+router.put('/trashtweet/:tokenTweet/:tokenUser', async (req, res) => {
+    try {    
+        // look for user
+        const usertrash = await User.findOne({ tokenUser: req.params.tokenUser });
+        if (!usertrash) {
+            return res.status(404).json({ result: false, message: 'Utiliuser not foundsateur non trouvé.' });
+        }
+
+        // look for the tweet
+        const tweettrash = await Tweet.findOne({ tokenTweet: req.params.tokenTweet });
+        if (!tweettrash) {
+            return res.status(404).json({ result: false, message: 'Tweet not found.' });
+        }
+
+        // check if the user write the tweet to delete it
+        if (tweettrash.user.toString() === usertrash._id.toString()) {
+            tweettrash.trash = true; // trash from fale to true
+            await tweettrash.save(); 
+            console.log('Tweet is trash : tru');
+        } else {
+            return res.status(403).json({ result: false, message: 'user false.' });
+        }
+
+        return res.json({ result: true, message: 'the tweet is trash true.' });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ result: false, message: 'error.', error });
+    }
+});
+
+
+//---------------------------------------------------------------------------------
+//****************---------------------HASTAG---------------------****************/
+//---------------------------------------------------------------------------------
+
+router.post('/hastag/:tokenTweet', async( req , res ){
+    const hastagTweet = Tweet
+})
 
 module.exports = router;
