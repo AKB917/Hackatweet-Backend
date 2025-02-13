@@ -19,7 +19,7 @@ router.get('/', function(req, res, next) {
 //New User SignUp
 //---------------------------------------------------------------------------
 router.post('/signup', (req, res) => {
-  if (!checkBody(req.body, ['username', 'password','firstname'])) {
+  if (!checkBody(req.body, ['username', 'password'])) {
     res.json({ result: false, error: 'Missing or empty fields' });
     return;
   }
@@ -33,7 +33,7 @@ router.post('/signup', (req, res) => {
         firstname: req.body.firstname,
         username: req.body.username,
         password: hash,
-        token: uid2(32),
+        tokenUser: uid2(32),
         avatar: "avatar.jpg",
       });
 

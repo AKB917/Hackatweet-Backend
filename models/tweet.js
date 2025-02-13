@@ -5,6 +5,11 @@ const tweetSchema = mongoose.Schema({
     tweet: String,
     date : Date,
     trash: Boolean,
+    tokenTweet : String,
+    liker : [String],
+    like: { type : Number , default : 0},
+    
+    
 });
 
 const Tweet = mongoose.model('tweets', tweetSchema);
