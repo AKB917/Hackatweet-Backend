@@ -97,7 +97,7 @@ router.get('/', async (req, res) => {
     try {
         //find all untrash tweet 
         const tweetData = await Tweet.find({ trash: false }).populate('user');
-// console.log(tweetData.date);
+ console.log(tweetData);
 
 const obj = tweetData.map(tweet => {
     const formattedDate = getTimeElapsed(tweet.date); // change the date to time spend

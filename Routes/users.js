@@ -9,17 +9,12 @@ const { checkBody } = require('../modules/checkBody');
 const uid2 = require('uid2');
 const bcrypt = require('bcrypt');
 
-/* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
-});
-
 
 //---------------------------------------------------------------------------
 //New User SignUp
 //---------------------------------------------------------------------------
 router.post('/signup', (req, res) => {
-  if (!checkBody(req.body, ['username', 'password', 'fisrtname'])) {
+  if (!checkBody(req.body, ['username', 'password', 'firstname'])) {
     res.json({ result: false, error: 'Missing or empty fields' });
     return;
   }
