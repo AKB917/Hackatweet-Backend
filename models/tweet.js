@@ -8,8 +8,6 @@ const tweetSchema = mongoose.Schema({
     tokenTweet : String,
     liker : [String],
     like: { type : Number , default : 0},
-    
-    
 });
 
 const Tweet = mongoose.model('tweets', tweetSchema);

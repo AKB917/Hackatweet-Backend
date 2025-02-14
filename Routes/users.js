@@ -19,7 +19,7 @@ router.get('/', function(req, res, next) {
 //New User SignUp
 //---------------------------------------------------------------------------
 router.post('/signup', (req, res) => {
-  if (!checkBody(req.body, ['username', 'password'])) {
+  if (!checkBody(req.body, ['username', 'password', 'fisrtname'])) {
     res.json({ result: false, error: 'Missing or empty fields' });
     return;
   }
@@ -65,10 +65,6 @@ router.post('/signin', (req, res) => {
     }
   });
 });
-
-//---------------------------------------------------------------------------
-//User SignUp
-//---------------------------------------------------------------------------
 
 
 module.exports = router;
