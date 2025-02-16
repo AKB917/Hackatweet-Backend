@@ -205,6 +205,28 @@ router.put('/trashtweet/:tokenTweet/:tokenUser', async (req, res) => {
 //---------------------------------------------------------------------------------
 //****************---------------------HASTAG---------------------****************/
 //---------------------------------------------------------------------------------
+router.get('/hashtag/', async (req, res) => {
+    try {
+        // Récupérer tous les hashtags avec les tweets associés
+        const hashtagTweets = await Hashtag.find().populate({
+            path: 'tweets',
+            populate: { path: 'user', select: 'firstname username avatar tokenUser' } // Sélection des champs utiles de User
+        });
+
+        // Extraire les noms des hashtags
+        const hashtags = hashtagTweets.map(hashtag => hashtag.name);
+
+        if (!hashtags || hashtags.length === 0) {
+            return res.status(404).json({ result: false, message: 'No hashtags found.' });
+        }
+
+        res.json({ result: true, hashtags: hashtags });
+    } catch (error) {
+        console.error('Erreur attrapée:', error);
+        res.status(500).json({ result: false, message: 'Une erreur est survenue.', error });
+    }
+});
+
 
 router.get('/hashtag/:name', async (req, res) => {
     try {
